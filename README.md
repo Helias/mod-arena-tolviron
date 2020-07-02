@@ -19,6 +19,8 @@ In short words, you become a contributor if you make one of the followings:
 - test a few Pull Requests
 - write 3 new wiki pages or (1-2 big one)
 
+Alternatively, you can get this module by donating 100$ to the AzoerhtCore organization. All the money donated to AzerothCore will be used to maintaining the infrastructure and support the community.
+
 ## Preview & Screenshot
 
 ![Tol'Viron Load Screen](https://raw.githubusercontent.com/azerothcore/mod-arena-tolviron/master/images/LoadScreenTolvirArena.png)  
