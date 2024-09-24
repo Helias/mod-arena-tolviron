@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Arena.h"
 #include "Battleground.h"
 #include "GameObject.h"
 #include "ObjectMgr.h"
@@ -48,26 +49,25 @@ enum BattlegroundTVObjects
     BG_TV_OBJECT_TYPE_BUFF_2    = 184664
 };
 
-class BattlegroundTV : public Battleground
+class AC_GAME_API BattlegroundTV : public Arena
 {
     public:
         BattlegroundTV();
         ~BattlegroundTV();
 
         /* inherited from BattlegroundClass */
-        void AddPlayer(Player* player);
-        void StartingEventCloseDoors();
-        void StartingEventOpenDoors();
+        // void AddPlayer(Player* player);
+        void StartingEventCloseDoors() override;
+        void StartingEventOpenDoors() override;
 
-        void RemovePlayer(Player* player);
-        void HandleAreaTrigger(Player* player, uint32 trigger);
-        bool SetupBattleground();
-        void Init();
-        void FillInitialWorldStates(WorldPacket &data);
-        void HandleKillPlayer(Player* player, Player* killer);
+        // void RemovePlayer(Player* player);
+        void HandleAreaTrigger(Player* player, uint32 trigger) override;
+        bool SetupBattleground() override;
+        void FillInitialWorldStates(WorldPacket &data) override;
+        // void HandleKillPlayer(Player* player, Player* killer);
 
-        /* Scorekeeping */
-        void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true);
+        // /* Scorekeeping */
+        // bool UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true) override;
 };
 
 
@@ -80,16 +80,6 @@ BattlegroundQueueTypeId BATTLEGROUND_QUEUE_TV = BattlegroundQueueTypeId(0);
 BattlegroundTV::BattlegroundTV()
 {
     BgObjects.resize(BG_TV_OBJECT_MAX);
-
-    StartDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_1M;
-    StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_30S;
-    StartDelayTimes[BG_STARTING_EVENT_THIRD]  = BG_START_DELAY_15S;
-    StartDelayTimes[BG_STARTING_EVENT_FOURTH] = BG_START_DELAY_NONE;
-    //we must set messageIds
-    StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_ARENA_ONE_MINUTE;
-    StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_ARENA_THIRTY_SECONDS;
-    StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_ARENA_FIFTEEN_SECONDS;
-    StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
 }
 
 BattlegroundTV::~BattlegroundTV() { }
@@ -112,38 +102,38 @@ void BattlegroundTV::StartingEventOpenDoors()
         SpawnBGObject(i, 60);
 }
 
-void BattlegroundTV::AddPlayer(Player* player)
-{
-    Battleground::AddPlayer(player);
-    PlayerScores[player->GetGUID()] = new BattlegroundScore(player);
-    Battleground::UpdateArenaWorldState();
-}
+// void BattlegroundTV::AddPlayer(Player* player)
+// {
+//     Battleground::AddPlayer(player);
+//     PlayerScores[player->GetGUID()] = new BattlegroundScore(player);
+//     Battleground::UpdateArenaWorldState();
+// }
 
-void BattlegroundTV::RemovePlayer(Player* /*player*/)
-{
-    if (GetStatus() == STATUS_WAIT_LEAVE)
-        return;
+// void BattlegroundTV::RemovePlayer(Player* /*player*/)
+// {
+//     if (GetStatus() == STATUS_WAIT_LEAVE)
+//         return;
 
-    Battleground::UpdateArenaWorldState();
-    CheckArenaWinConditions();
-}
+//     Battleground::UpdateArenaWorldState();
+//     CheckArenaWinConditions();
+// }
 
-void BattlegroundTV::HandleKillPlayer(Player* player, Player* killer)
-{
-    if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
+// void BattlegroundTV::HandleKillPlayer(Player* player, Player* killer)
+// {
+//     if (GetStatus() != STATUS_IN_PROGRESS)
+//         return;
 
-    if (!killer)
-    {
-        sLog->outError("BattlegroundTV: Killer player not found");
-        return;
-    }
+//     if (!killer)
+//     {
+//         sLog->outError("BattlegroundTV: Killer player not found");
+//         return;
+//     }
 
-    Battleground::HandleKillPlayer(player, killer);
+//     Battleground::HandleKillPlayer(player, killer);
 
-    Battleground::UpdateArenaWorldState();
-    CheckArenaWinConditions();
-}
+//     Battleground::UpdateArenaWorldState();
+//     CheckArenaWinConditions();
+// }
 
 void BattlegroundTV::HandleAreaTrigger(Player* /* player */, uint32 trigger)
 {
@@ -163,14 +153,7 @@ void BattlegroundTV::HandleAreaTrigger(Player* /* player */, uint32 trigger)
 void BattlegroundTV::FillInitialWorldStates(WorldPacket &data)
 {
     data << uint32(0xE1A) << uint32(1);
-    Battleground::UpdateArenaWorldState();
-}
-
-
-void BattlegroundTV::Init()
-{
-    //call parent's class reset
-    Battleground::Init();
+    Arena::FillInitialWorldStates(data);
 }
 
 bool BattlegroundTV::SetupBattleground()
@@ -182,22 +165,22 @@ bool BattlegroundTV::SetupBattleground()
         || !AddObject(BG_TV_OBJECT_BUFF_1, BG_TV_OBJECT_TYPE_BUFF_1, -10717.63f, 383.8223f, 24.412825f, 1.555f, 0.0f, 0.0f, 0.70154f, 120)
         || !AddObject(BG_TV_OBJECT_BUFF_2, BG_TV_OBJECT_TYPE_BUFF_2, -10716.6f, 475.364f, 24.4131f, 0.0f, 0.0f, 0.70068f, -0.713476f, 120))
     {
-        sLog->outError("BattlegroundTV: Failed to spawn some object!");
+        LOG_ERROR("sql.sql", "BattlegroundTV: Failed to spawn some object!");
         return false;
     }
 
     return true;
 }
 
-void BattlegroundTV::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
-{
-    BattlegroundScoreMap::iterator itr = PlayerScores.find(Source->GetGUID());
-    if (itr == PlayerScores.end())                         // player not found...
-        return;
+// void BattlegroundTV::UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor)
+// {
+//     BattlegroundScoreMap::iterator itr = PlayerScores.find(Source->GetGUID());
+//     if (itr == PlayerScores.end())                         // player not found...
+//         return;
 
-    //there is nothing special in this score
-    Battleground::UpdatePlayerScore(Source, type, value, doAddHonor);
-}
+//     //there is nothing special in this score
+//     Battleground::UpdatePlayerScore(Source, type, value, doAddHonor);
+// }
 
 class TolVironWorld : public WorldScript
 {
