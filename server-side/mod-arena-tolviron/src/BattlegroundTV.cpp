@@ -63,7 +63,7 @@ class AC_GAME_API BattlegroundTV : public Arena
         // void RemovePlayer(Player* player);
         void HandleAreaTrigger(Player* player, uint32 trigger) override;
         bool SetupBattleground() override;
-        void FillInitialWorldStates(WorldPacket &data) override;
+        void FillInitialWorldStates(WorldPackets::WorldState::InitWorldStates& packet) override;
         // void HandleKillPlayer(Player* player, Player* killer);
 
         // /* Scorekeeping */
@@ -150,10 +150,10 @@ void BattlegroundTV::HandleAreaTrigger(Player* /* player */, uint32 trigger)
     }
 }
 
-void BattlegroundTV::FillInitialWorldStates(WorldPacket &data)
+void BattlegroundTV::FillInitialWorldStates(WorldPackets::WorldState::InitWorldStates& packet)
 {
-    data << uint32(0xE1A) << uint32(1);
-    Arena::FillInitialWorldStates(data);
+    packet.Worldstates.emplace_back(0xE1A, 1);
+    Arena::FillInitialWorldStates(packet);
 }
 
 bool BattlegroundTV::SetupBattleground()
@@ -197,15 +197,15 @@ void AddTolVironScripts() {
 
 	BattlegroundMgr::bgTypeToTemplate[BATTLEGROUND_TV] = [](Battleground *bg_t) -> Battleground * { return new BattlegroundTV(*(BattlegroundTV *)bg_t); };
 
-	Player::bgZoneIdToFillWorldStates[6296] = [](Battleground* bg, WorldPacket& data) {
+	Player::bgZoneIdToFillWorldStates[6296] = [](Battleground* bg, WorldPackets::WorldState::InitWorldStates& packet) {
     if (bg && bg->GetBgTypeID(true) == BATTLEGROUND_TV) {
-      bg->FillInitialWorldStates(data);
+      bg->FillInitialWorldStates(packet);
     }
     else
     {
-        data << uint32(0xa0f) << uint32(0x0);           // 7
-        data << uint32(0xa10) << uint32(0x0);           // 8
-        data << uint32(0xa11) << uint32(0x0);           // 9 show
+        packet.Worldstates.emplace_back(0xa0f, 0x0);           // 7
+        packet.Worldstates.emplace_back(0xa10, 0x0);           // 8
+        packet.Worldstates.emplace_back(0xa11, 0x0);           // 9 show
     }
 	};
 }
