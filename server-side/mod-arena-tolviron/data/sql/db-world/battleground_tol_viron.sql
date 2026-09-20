@@ -4,7 +4,7 @@ INSERT INTO `battleground_template` (`ID`,`MinPlayersPerTeam`,`MaxPlayersPerTeam
 (870,0,5,10,80,4136,0,4137,0,0,1,"","Tol'vir Arena");
 
 -- game_graveyard
-DELETE FROM `game_graveyard` WHERE entry IN (4135, 4136, 4137, 4138, 4534, 4535, 4536);
+DELETE FROM `game_graveyard` WHERE `ID` IN (4135, 4136, 4137, 4138, 4534, 4535, 4536);
 INSERT INTO `game_graveyard` VALUES
 (4135,980,-10716.7,429.2951,24.41168,"Tol'vir Arena - PvP - Arena Graveyard"),
 (4136,980,-10649.91,428.1719,24.41897," Arena - Tol'vir - Teleport Target - Team 1"),
